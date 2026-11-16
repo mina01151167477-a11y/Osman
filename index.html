@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>مغامرة مراجعة التاريخ</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #5b327a;
+    --primary-light: #7c4da1;
+    --gold: #d49b35;
+    --gold-light: #fdf5e6;
+    --emerald: #208b63;
+    --bg: #faf6f0;
+  }
+
+  * {
+    box-sizing: border-box;
+    font-family: 'Cairo', Tahoma, sans-serif;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    color: #2c3545;
+    background: 
+      radial-gradient(circle at 15% 15%, rgba(212, 155, 53, 0.14) 0%, transparent 35%),
+      radial-gradient(circle at 85% 80%, rgba(91, 50, 122, 0.12) 0%, transparent 35%),
+      linear-gradient(135deg, #fdfbf7 0%, #f3ece1 100%);
+    overflow-x: hidden;
+  }
+
+  .container {
+    max-width: 1020px;
+    margin: auto;
+    padding: 20px 16px 40px;
+  }
+
+  /* الهيدر */
+  header {
+    text-align: center;
+    margin-bottom: 24px;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, #fff, #fdf6e7);
+    color: #9e6b18;
+    border: 2px solid #e6c687;
+    padding: 6px 20px;
+    border-radius: 50px;
+    font-weight: 700;
+    font-size: 14px;
+    box-shadow: 0 4px 15px rgba(212, 155, 53, 0.15);
+  }
+
+  h1 {
+    color: var(--primary);
+    font-size: clamp(26px, 4.5vw, 38px);
+    font-weight: 900;
+    margin: 12px 0 6px;
+    text-shadow: 0 2px 10px rgba(91, 50, 122, 0.1);
+  }
+
+  .subtitle {
+    color: #636e7e;
+    font-size: 15px;
+    margin: 0;
+  }
+
+  /* الحاوية الرئيسية */
+  .panel {
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(10px);
+    border: 2px solid #eadcc5;
+    border-radius: 28px;
+    padding: clamp(18px, 3vw, 30px);
+    box-shadow: 0 20px 45px rgba(72, 48, 92, 0.08);
+  }
+
+  .stage-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .section-title {
+    color: var(--primary);
+    font-size: 20px;
+    font-weight: 900;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .counter-pill {
+    background: #f3eafc;
+    color: var(--primary);
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 14px;
+  }
+
+  /* شريط التقدم */
+  .progress {
+    height: 12px;
+    background: #ede6f2;
+    border-radius: 20px;
+    overflow: hidden;
+    margin-bottom: 24px;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.06);
+  }
+
+  .progress span {
+    display: block;
+    width: 0%;
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold), var(--primary-light), var(--emerald));
+    border-radius: 20px;
+    transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  /* البطاقات */
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 18px;
+  }
+
+  .card-wrap {
+    perspective: 1100px;
+    height: 265px;
+    cursor: pointer;
+  }
+
+  .card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    transition: transform 0.75s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .card-wrap:hover:not(.flipped) .card-inner {
+    transform: translateY(-6px) rotateY(8deg);
+  }
+
+  .card-wrap.flipped .card-inner {
+    transform: rotateY(180deg);
+  }
+
+  .card-face {
+    position: absolute;
+    inset: 0;
+    border-radius: 22px;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+    text-align: center;
+  }
+
+  /* ظهر البطاقة */
+  .card-back {
+    background: linear-gradient(145deg, #6b3d8e, #472563);
+    color: #fff;
+    border: 3px solid #e5c37b;
+    box-shadow: 0 12px 25px rgba(71, 37, 99, 0.25);
+  }
+
+  .card-back::before {
+    content: "";
+    position: absolute;
+    inset: 9px;
+    border: 1.5px dashed rgba(229, 195, 123, 0.6);
+    border-radius: 15px;
+    pointer-events: none;
+  }
+
+  .svg-icon {
+    width: 64px;
+    height: 64px;
+    margin-bottom: 10px;
+    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.25));
+    transition: transform 0.3s ease;
+  }
+
+  .card-wrap:hover .svg-icon {
+    transform: scale(1.08);
+  }
+
+  .card-back h3 {
+    margin: 0;
+    font-size: 19px;
+    font-weight: 700;
+    color: #fce8b2;
+  }
+
+  .card-back p {
+    margin: 6px 0 0;
+    font-size: 13px;
+    color: #e4d4f2;
+  }
+
+  /* وجه البطاقة */
+  .card-front {
+    transform: rotateY(180deg);
+    background: linear-gradient(160deg, #ffffff 0%, #fffaf0 100%);
+    border: 2.5px solid #e3c485;
+    box-shadow: 0 12px 25px rgba(163, 128, 62, 0.15);
+    justify-content: space-between;
+  }
+
+  .card-front .num-badge {
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    color: #fff;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 16px;
+    box-shadow: 0 4px 10px rgba(91, 50, 122, 0.25);
+  }
+
+  .card-front .question {
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.75;
+    color: #2b3442;
+    margin: 8px 0;
+  }
+
+  .card-front .mini-svg {
+    width: 36px;
+    height: 36px;
+    opacity: 0.85;
+  }
+
+  .card-wrap.done .card-front {
+    border-color: #6bc49c;
+    background: linear-gradient(160deg, #ffffff 0%, #f1fcf7 100%);
+  }
+
+  .card-wrap.done .num-badge {
+    background: linear-gradient(135deg, #208b63, #34b383);
+  }
+
+  /* شريط الحالة */
+  .status-box {
+    margin-top: 20px;
+    background: #f8f5fc;
+    border: 1.5px solid #e2d5ee;
+    border-radius: 16px;
+    padding: 12px 16px;
+    text-align: center;
+    font-weight: 700;
+    color: var(--primary);
+    font-size: 15px;
+  }
+
+  /* المرحلة الثانية */
+  #titleStage {
+    display: none;
+    margin-top: 28px;
+    padding-top: 26px;
+    border-top: 2px dashed #dec9a4;
+    animation: fadeUp 0.6s ease forwards;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .stage2-header {
+    text-align: center;
+    margin-bottom: 18px;
+  }
+
+  .stage2-header h2 {
+    color: var(--primary);
+    font-size: 22px;
+    font-weight: 900;
+    margin: 0 0 4px;
+  }
+
+  .stage2-header p {
+    color: #636e7e;
+    margin: 0;
+    font-size: 14px;
+  }
+
+  /* أزرار الكلمات ثلاثية الأبعاد */
+  .words {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 14px;
+  }
+
+  .word {
+    background: linear-gradient(180deg, #ffffff 0%, #f9f4fc 100%);
+    border: 2px solid #cbb2e0;
+    border-bottom: 5px solid #9b72bd;
+    border-radius: 16px;
+    padding: 14px 12px;
+    color: var(--primary);
+    font-size: 17px;
+    font-weight: 900;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    box-shadow: 0 4px 10px rgba(91, 50, 122, 0.08);
+  }
+
+  .word:hover:not(:disabled) {
+    transform: translateY(-3px);
+    background: linear-gradient(180deg, #fffdf8 0%, #fdf2dc 100%);
+    border-color: var(--gold);
+    border-bottom-color: #b57e1d;
+    color: #8a5a0d;
+  }
+
+  .word:active:not(:disabled) {
+    transform: translateY(2px);
+    border-bottom-width: 2px;
+  }
+
+  .word.selected {
+    background: #e6f7ef;
+    border-color: #6bc49c;
+    border-bottom: 3px solid #39966d;
+    color: #1c7350;
+    opacity: 0.65;
+    cursor: default;
+  }
+
+  /* صندوق التجميع */
+  .selectedWords {
+    background: #fffdf9;
+    border: 2px dashed #d4b475;
+    border-radius: 18px;
+    padding: 16px;
+    min-height: 64px;
+    margin-top: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    font-size: 18px;
+    font-weight: 900;
+    color: var(--primary);
+  }
+
+  .chosen-chip {
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    color: #fff;
+    padding: 6px 16px;
+    border-radius: 12px;
+    box-shadow: 0 3px 8px rgba(91, 50, 122, 0.2);
+    animation: popIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  @keyframes popIn {
+    from { transform: scale(0.7); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+
+  /* زر الإعادة */
+  .actions {
+    display: flex;
+    justify-content: center;
+    margin-top: 16px;
+  }
+
+  .btn-reset {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #f1edf5;
+    color: #5d4c6e;
+    border: 2px solid #d5c8e0;
+    border-bottom: 4px solid #b8a5c9;
+    border-radius: 14px;
+    padding: 10px 22px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.15s;
+  }
+
+  .btn-reset:hover {
+    background: #e7dff0;
+    transform: translateY(-2px);
+  }
+
+  .btn-reset:active {
+    transform: translateY(2px);
+    border-bottom-width: 2px;
+  }
+
+  /* رسالة الخطأ البسيطة */
+  .try-again {
+    display: none;
+    margin-top: 14px;
+    text-align: center;
+    color: #c0392b;
+    background: #fdecea;
+    border: 1.5px solid #f5b7b1;
+    padding: 10px;
+    border-radius: 14px;
+    font-weight: 700;
+    font-size: 15px;
+    animation: shake 0.4s ease;
+  }
+
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-6px); }
+    75% { transform: translateX(6px); }
+  }
+
+  /* رسالة النجاح النهائية */
+  .success {
+    display: none;
+    margin-top: 22px;
+    padding: 26px 20px;
+    border-radius: 22px;
+    text-align: center;
+    background: linear-gradient(135deg, #ebfbf3 0%, #fff9eb 100%);
+    border: 2.5px solid #52b788;
+    box-shadow: 0 15px 35px rgba(32, 139, 99, 0.15);
+    animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .success.show {
+    display: block;
+  }
+
+  .success h3 {
+    color: var(--emerald);
+    font-size: 24px;
+    font-weight: 900;
+    margin: 8px 0;
+  }
+
+  .lesson-title-box {
+    display: inline-block;
+    background: linear-gradient(135deg, var(--primary), #431f5e);
+    color: #fce8b2;
+    border: 2px solid var(--gold);
+    padding: 12px 26px;
+    border-radius: 16px;
+    font-size: clamp(18px, 3vw, 24px);
+    font-weight: 900;
+    margin: 10px 0;
+    box-shadow: 0 8px 20px rgba(91, 50, 122, 0.25);
+  }
+
+  @media (max-width: 600px) {
+    .card-wrap { height: 235px; }
+    .card-front .question { font-size: 15px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <div class="badge">
+      <span>🏛️</span>
+      <span>مغامرات في التاريخ</span>
+    </div>
+    <h1>افتحي البطاقات واكتشفي عنوان الدرس!</h1>
+    <p class="subtitle">اقلبي بطاقات المراجعة الأربع أولاً لتفتحي بوابة عنوان درسنا الجديد</p>
+  </header>
+
+  <section class="panel">
+    <div class="stage-header">
+      <h2 class="section-title">✨ المرحلة الأولى: بطاقات المراجعة</h2>
+      <span class="counter-pill" id="counterText">0 / 4 بطاقات</span>
+    </div>
+
+    <div class="progress">
+      <span id="progressBar"></span>
+    </div>
+
+    <div class="cards">
+      <!-- البطاقة 1 -->
+      <div class="card-wrap" data-id="0">
+        <div class="card-inner">
+          <div class="card-face card-back">
+            <!-- رسمة بوابة تاريخية SVG -->
+            <svg class="svg-icon" viewBox="0 0 64 64" fill="none">
+              <path d="M12 56V26C12 15 21 8 32 8C43 8 52 15 52 26V56H12Z" fill="#F6D388" stroke="#FFF" stroke-width="2.5"/>
+              <path d="M22 56V32C22 26.5 26.5 22 32 22C37.5 22 42 26.5 42 32V56H22Z" fill="#5B327A"/>
+              <circle cx="32" cy="15" r="3" fill="#5B327A"/>
+            </svg>
+            <h3>البطاقة الأولى</h3>
+            <p>اضغطي لكشف السؤال</p>
+          </div>
+          <div class="card-face card-front">
+            <div class="num-badge">1</div>
+            <div class="question">ما العوامل التي دفعت القبائل التركمانية إلى الهجرة نحو الأناضول؟</div>
+            <svg class="mini-svg" viewBox="0 0 64 64" fill="none">
+              <circle cx="32" cy="32" r="26" fill="#FDF2DC" stroke="#D49B35" stroke-width="3"/>
+              <path d="M32 14L36 28L50 32L36 36L32 50L28 36L14 32L28 28L32 14Z" fill="#D49B35"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- البطاقة 2 -->
+      <div class="card-wrap" data-id="1">
+        <div class="card-inner">
+          <div class="card-face card-back">
+            <!-- رسمة مخطوطة ملكية SVG -->
+            <svg class="svg-icon" viewBox="0 0 64 64" fill="none">
+              <rect x="16" y="12" width="32" height="40" rx="4" fill="#FFF3D6" stroke="#E5C37B" stroke-width="2.5"/>
+              <rect x="12" y="10" width="40" height="7" rx="3.5" fill="#D49B35"/>
+              <rect x="12" y="47" width="40" height="7" rx="3.5" fill="#D49B35"/>
+              <path d="M23 25H41M23 32H41M23 39H34" stroke="#5B327A" stroke-width="3" stroke-linecap="round"/>
+            </svg>
+            <h3>البطاقة الثانية</h3>
+            <p>اضغطي لكشف السؤال</p>
+          </div>
+          <div class="card-face card-front">
+            <div class="num-badge">2</div>
+            <div class="question">إلى من يُنسب اسم الدولة العثمانية؟ ولماذا حملت هذا الاسم؟</div>
+            <svg class="mini-svg" viewBox="0 0 64 64" fill="none">
+              <path d="M12 46L16 20L27 31L32 16L37 31L48 20L52 46H12Z" fill="#D49B35" stroke="#9E6B18" stroke-width="2.5" stroke-linejoin="round"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- البطاقة 3 -->
+      <div class="card-wrap" data-id="2">
+        <div class="card-inner">
+          <div class="card-face card-back">
+            <!-- رسمة درع وسيوف SVG -->
+            <svg class="svg-icon" viewBox="0 0 64 64" fill="none">
+              <path d="M32 10L50 18V32C50 44 42 52 32 56C22 52 14 44 14 32V18L32 10Z" fill="#F6D388" stroke="#FFF" stroke-width="2.5"/>
+              <path d="M32 18L42 22V31C42 38 37 44 32 47C27 44 22 38 22 31V22L32 18Z" fill="#5B327A"/>
+            </svg>
+            <h3>البطاقة الثالثة</h3>
+            <p>اضغطي لكشف السؤال</p>
+          </div>
+          <div class="card-face card-front">
+            <div class="num-badge">3</div>
+            <div class="question">ما اسم الجيش الذي أنشأه السلطان أورخان بن عثمان؟</div>
+            <svg class="mini-svg" viewBox="0 0 64 64" fill="none">
+              <path d="M32 10L50 18V32C50 44 42 52 32 56C22 52 14 44 14 32V18L32 10Z" fill="#E8D8F5" stroke="#5B327A" stroke-width="3"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- البطاقة 4 -->
+      <div class="card-wrap" data-id="3">
+        <div class="card-inner">
+          <div class="card-face card-back">
+            <!-- رسمة تاج ووسام SVG -->
+            <svg class="svg-icon" viewBox="0 0 64 64" fill="none">
+              <path d="M10 45L15 21L26 32L32 15L38 32L49 21L54 45H10Z" fill="#F6D388" stroke="#FFF" stroke-width="2.5" stroke-linejoin="round"/>
+              <rect x="12" y="48" width="40" height="6" rx="3" fill="#D49B35"/>
+            </svg>
+            <h3>البطاقة الرابعة</h3>
+            <p>اضغطي لكشف السؤال</p>
+          </div>
+          <div class="card-face card-front">
+            <div class="num-badge">4</div>
+            <div class="question">ما أبرز الإنجازات التي حققها السلطان مراد الأول؟</div>
+            <svg class="mini-svg" viewBox="0 0 64 64" fill="none">
+              <circle cx="32" cy="26" r="14" fill="#F6D388" stroke="#D49B35" stroke-width="3"/>
+              <path d="M25 38L20 54L32 48L44 54L39 38" fill="#5B327A"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="status-box" id="status">
+      🔮 افتحي البطاقات الأربع لمناقشتها والانتقال للمرحلة التالية
+    </div>
+
+    <!-- المرحلة الثانية -->
+    <div id="titleStage">
+      <div class="stage2-header">
+        <h2>🧩 المرحلة الثانية: رتّبي عنوان الدرس</h2>
+        <p>اضغطي على الكلمات بالترتيب الصحيح لتكوين عنوان درس اليوم</p>
+      </div>
+
+      <div class="words">
+        <button class="word" data-word="الجزء الثاني">الجزء الثاني</button>
+        <button class="word" data-word="وتطورها">وتطورها</button>
+        <button class="word" data-word="الدولة العثمانية">الدولة العثمانية</button>
+        <button class="word" data-word="نشأة">نشأة</button>
+      </div>
+
+      <div class="selectedWords" id="selectedWords">
+        <span style="color:#9e8fb0; font-weight:500; font-size:15px;">اختاري الكلمات بالترتيب من الأعلى...</span>
+      </div>
+
+      <div class="try-again" id="tryAgainMsg">
+        ⚠️ الترتيب غير صحيح! اضغطي على "إعادة المحاولة" ورتّبي الكلمات من جديد.
+      </div>
+
+      <div class="actions" id="resetContainer">
+        <button class="btn-reset" id="resetTitle">🔄 إعادة المحاولة</button>
+      </div>
+
+      <!-- رسالة التهنئة وعنوان الدرس -->
+      <div class="success" id="success">
+        <div style="font-size: 42px;">🎉👑✨</div>
+        <h3>أحسنتِ يا بطلة!</h3>
+        <p style="margin:4px 0; font-weight:700; color:#4a5568;">لقد اكتشفتِ عنوان درسنا الجديد بنجاح:</p>
+        <div class="lesson-title-box">
+          نشأة الدولة العثمانية وتطورها – الجزء الثاني
+        </div>
+        <p style="margin:6px 0 0; font-size:14px; color:#208b63; font-weight:700;">هيا بنا نبدأ رحلتنا التاريخية الممتعة!</p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+  const opened = new Set();
+  const cards = document.querySelectorAll(".card-wrap");
+  const progressBar = document.getElementById("progressBar");
+  const counterText = document.getElementById("counterText");
+  const statusBox = document.getElementById("status");
+  const titleStage = document.getElementById("titleStage");
+
+  // منطق فتح البطاقات
+  cards.forEach(card => {
+    card.addEventListener("click", () => {
+      const id = Number(card.dataset.id);
+      if (opened.has(id)) return;
+
+      card.classList.add("flipped");
+      opened.add(id);
+
+      const count = opened.size;
+      progressBar.style.width = (count / 4 * 100) + "%";
+      counterText.textContent = `${count} / 4 بطاقات`;
+
+      if (count === 4) {
+        cards.forEach(c => c.classList.add("done"));
+        statusBox.innerHTML = "🌟 رائعة! اكتملت المراجعة، رتّبي الكلمات بالأسفل لاكتشاف عنوان الدرس.";
+        statusBox.style.background = "#ebfbf3";
+        statusBox.style.borderColor = "#6bc49c";
+        statusBox.style.color = "#1c7350";
+
+        titleStage.style.display = "block";
+        setTimeout(() => {
+          titleStage.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }, 450);
+      } else {
+        statusBox.textContent = `✨ أحسنتِ! فتحتِ ${count} من 4 بطاقات، تابعي فتح البقية.`;
+      }
+    });
+  });
+
+  // منطق ترتيب عنوان الدرس
+  const correctOrder = ["نشأة", "الدولة العثمانية", "وتطورها", "الجزء الثاني"];
+  let chosen = [];
+
+  const wordButtons = document.querySelectorAll(".word");
+  const selectedBox = document.getElementById("selectedWords");
+  const tryAgainMsg = document.getElementById("tryAgainMsg");
+  const successBox = document.getElementById("success");
+  const resetBtn = document.getElementById("resetTitle");
+
+  wordButtons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      const word = btn.dataset.word;
+      if (chosen.includes(word)) return;
+
+      chosen.push(word);
+      btn.classList.add("selected");
+      btn.disabled = true;
+
+      // عرض الكلمات المختارة بشكل أنيق
+      selectedBox.innerHTML = chosen
+        .map(w => `<span class="chosen-chip">${w}</span>`)
+        .join(`<span style="color:#d49b35;">✦</span>`);
+
+      // التحقق التلقائي بمجرد اختيار الكلمات الأربع
+      if (chosen.length === correctOrder.length) {
+        if (chosen.join("|") === correctOrder.join("|")) {
+          tryAgainMsg.style.display = "none";
+          successBox.classList.add("show");
+          document.getElementById("resetContainer").style.display = "none";
+          setTimeout(() => {
+            successBox.scrollIntoView({ behavior: "smooth", block: "nearest" });
+          }, 200);
+        } else {
+          tryAgainMsg.style.display = "block";
+        }
+      }
+    });
+  });
+
+  // إعادة المحاولة
+  resetBtn.addEventListener("click", () => {
+    chosen = [];
+    wordButtons.forEach(btn => {
+      btn.disabled = false;
+      btn.classList.remove("selected");
+    });
+    selectedBox.innerHTML = `<span style="color:#9e8fb0; font-weight:500; font-size:15px;">اختاري الكلمات بالترتيب من الأعلى...</span>`;
+    tryAgainMsg.style.display = "none";
+    successBox.classList.remove("show");
+  });
+</script>
+
+</body>
+</html>
